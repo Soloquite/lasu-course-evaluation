@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — LASU Course Evaluation{% endblock %}
+
+{% block guest_header %}{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-2xl bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_12px_rgba(0,51,102,0.05)] p-8">
+    <div class="text-center mb-8">
+        {% load static %}
+        <img alt="LASU Institutional Logo" class="h-16 w-auto object-contain mx-auto mb-4" src="{% static 'images/logo.png' %}"/>
+        <h2 class="font-title-md text-title-md text-primary font-extrabold mb-1">Create Your Account</h2>
+        <p class="text-sm text-outline">Select your academic role to get started</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Student Registration Card -->
+        <div class="border border-outline-variant hover:border-primary rounded-xl p-6 flex flex-col justify-between hover:shadow-md transition-all bg-surface-container-low/50">
+            <div>
+                <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed mb-4">
+                    <span class="material-symbols-outlined text-2xl">school</span>
+                </div>
+                <h3 class="font-title-md text-title-md font-bold text-primary mb-2">Student Portal</h3>
+                <p class="text-sm text-outline leading-relaxed mb-6">
+                    Submit anonymous, confidential evaluations for registered courses and view your compliance records.
+                </p>
+            </div>
+            <a href="{% url 'accounts:student_signup' %}" class="w-full py-3 bg-primary text-on-primary font-label-md text-label-md rounded shadow-sm hover:bg-primary-container hover:text-on-primary-container text-center block transition-all">
+                Student Sign Up &rarr;
+            </a>
+        </div>
+
+        <!-- Lecturer Registration Card -->
+        <div class="border border-outline-variant hover:border-primary rounded-xl p-6 flex flex-col justify-between hover:shadow-md transition-all bg-surface-container-low/50">
+            <div>
+                <div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-primary mb-4">
+                    <span class="material-symbols-outlined text-2xl">co_present</span>
+                </div>
+                <h3 class="font-title-md text-title-md font-bold text-primary mb-2">Lecturer Portal</h3>
+                <p class="text-sm text-outline leading-relaxed mb-6">
+                    Claim courses you teach, track submission metrics, and access aggregated student feedback reports.
+                </p>
+            </div>
+            <a href="{% url 'accounts:lecturer_signup' %}" class="w-full py-3 border border-outline text-primary hover:bg-surface-container-low font-label-md text-label-md rounded text-center block transition-all">
+                Lecturer Sign Up &rarr;
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-8 text-center border-t border-outline-variant pt-4">
+        <p class="text-sm text-outline">
+            Already have an account? <a class="font-label-md text-label-md text-primary hover:underline ml-1" href="{% url 'accounts:login' %}">Log In</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

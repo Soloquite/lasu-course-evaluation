@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Search & Add Courses — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+    <!-- Back breadcrumb -->
+    <div class="flex items-center">
+        <a href="{% url 'evaluations:student_dashboard' %}" class="flex items-center gap-1.5 text-sm font-semibold text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="border-b border-outline-variant pb-6">
+        <h2 class="font-display-lg text-3xl font-extrabold text-primary mb-1">Find & Add Courses</h2>
+        <p class="text-sm text-outline">Search for elective courses or courses outside your department to evaluate.</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+        <form method="get" class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                <input class="w-full pl-10 pr-3 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                       type="text" 
+                       name="q" 
+                       value="{{ query }}" 
+                       placeholder="Search by course code (e.g. CSC 401) or course title..." 
+                       required/>
+            </div>
+            <button class="px-6 py-3 bg-primary text-on-primary font-semibold text-sm rounded-xl hover:bg-primary-container hover:text-on-primary-container transition-all shadow-sm focus:outline-none flex items-center justify-center gap-2" type="submit">
+                Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Search results -->
+    {% if query %}
+        <div class="space-y-4">
+            <p class="text-xs uppercase tracking-wider font-bold text-outline">Search Results for "{{ query }}"</p>
+            
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                <div class="divide-y divide-outline-variant">
+                    {% for course in results %}
+                        <div class="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono font-bold bg-surface-container-high text-primary px-2 py-0.5 rounded">
+                                        {{ course.code }}
+                                    </span>
+                                    <span class="text-xs text-outline bg-surface-container-low px-2 py-0.5 rounded">
+                                        Level {{ course.level }}
+                                    </span>
+                                </div>
+                                <h4 class="text-base font-bold text-primary">{{ course.title }}</h4>
+                                <p class="text-xs text-outline">{{ course.department.name }} &bull; {{ course.semester }}</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                {% if course.id in registered_course_ids %}
+                                    <button class="px-4 py-2 border border-outline-variant text-outline bg-surface-container-low text-xs font-semibold rounded-lg cursor-not-allowed" disabled>
+                                        Already Registered
+                                    </button>
+                                {% else %}
+                                    <form method="post" action="{% url 'evaluations:add_course_registration' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="course_id" value="{{ course.id }}">
+                                        <button type="submit" class="px-4 py-2 bg-primary text-on-primary hover:bg-primary-container text-xs font-semibold rounded-lg shadow-sm transition-all focus:outline-none flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-xs">add</span>
+                                            Add Course
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="p-12 text-center">
+                            <span class="material-symbols-outlined text-5xl text-outline mb-4">search_off</span>
+                            <h3 class="text-lg font-bold text-primary mb-2">No Courses Found</h3>
+                            <p class="text-sm text-outline max-w-md mx-auto leading-relaxed">
+                                We couldn't find any courses matching "{{ query }}" in this semester. Check the spelling or try searching with different keywords.
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="border border-outline-variant rounded-xl p-12 text-center bg-surface-container-low/30">
+            <span class="material-symbols-outlined text-5xl text-outline mb-4">find_in_page</span>
+            <h3 class="text-lg font-bold text-primary mb-2">Start Searching</h3>
+            <p class="text-sm text-outline max-w-sm mx-auto leading-relaxed">
+                Enter a course code or name in the box above to find and register courses in the active semester.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

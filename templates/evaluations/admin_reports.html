@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Aggregated Reports — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Back breadcrumb -->
+    <div class="flex items-center">
+        <a href="{% url 'evaluations:admin_dashboard' %}" class="flex items-center gap-1.5 text-sm font-semibold text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant pb-6">
+        <div>
+            <h2 class="font-display-lg text-3xl font-extrabold text-primary mb-1">Institutional Aggregates</h2>
+            <p class="text-sm text-outline">
+                View student participation rates and mean ratings. Responses are threshold-gated (n &ge; 10) for privacy.
+            </p>
+        </div>
+        {% if selected_session %}
+            <div>
+                <a href="?session={{ selected_session.id }}&department={{ selected_department_id|default:'' }}&lecturer={{ selected_lecturer_id|default:'' }}&include_unclaimed={% if include_unclaimed %}true{% else %}false{% endif %}&export=csv" 
+                   class="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-full hover:bg-primary-container transition-all text-sm font-semibold shadow-sm focus:outline-none">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    Export CSV Report
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Filters Panel -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+                <label class="block font-label-sm text-xs font-bold text-primary mb-1.5" for="filter_session">Evaluation Session</label>
+                <select name="session" id="filter_session" class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-sm text-primary transition-shadow">
+                    {% for s in sessions %}
+                        <option value="{{ s.id }}" {% if s.id == selected_session.id %}selected{% endif %}>{{ s.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block font-label-sm text-xs font-bold text-primary mb-1.5" for="filter_department">Department</label>
+                <select name="department" id="filter_department" class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-sm text-primary transition-shadow">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}" {% if dept.id == selected_department_id %}selected{% endif %}>{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block font-label-sm text-xs font-bold text-primary mb-1.5" for="filter_lecturer">Lecturer</label>
+                <select name="lecturer" id="filter_lecturer" class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-sm text-primary transition-shadow">
+                    <option value="">All Lecturers</option>
+                    {% for lect in lecturers %}
+                        <option value="{{ lect.id }}" {% if lect.id == selected_lecturer_id %}selected{% endif %}>
+                            {{ lect.get_full_name|default:lect.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex items-center gap-2 pb-2 h-10">
+                <input type="checkbox" 
+                       name="include_unclaimed" 
+                       id="filter_include_unclaimed" 
+                       value="true" 
+                       class="rounded text-primary focus:ring-primary border-outline-variant h-5 w-5 cursor-pointer"
+                       {% if include_unclaimed %}checked{% endif %}>
+                <label class="font-label-sm text-xs font-bold text-primary cursor-pointer select-none" for="filter_include_unclaimed">Include Unclaimed</label>
+            </div>
+            
+            <div class="md:col-span-4 flex justify-end pt-2">
+                <button type="submit" class="px-5 py-2 bg-primary text-on-primary hover:bg-primary-container text-xs font-semibold rounded-lg shadow-sm transition-all focus:outline-none flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-xs">filter_list</span>
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Output -->
+    {% if not selected_session %}
+        <div class="border border-outline-variant rounded-xl p-12 text-center bg-surface-container-low/30">
+            <span class="material-symbols-outlined text-5xl text-outline mb-4">analytics</span>
+            <h3 class="text-lg font-bold text-primary mb-2">No Session Data</h3>
+            <p class="text-sm text-outline max-w-sm mx-auto leading-relaxed">
+                There are no evaluation sessions configured to load aggregates from.
+            </p>
+        </div>
+    {% else %}
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low/30 border-b border-outline-variant text-xs font-bold uppercase tracking-wider text-outline">
+                            <th class="p-4">Course Code</th>
+                            <th class="p-4">Course Title</th>
+                            <th class="p-4">Department</th>
+                            <th class="p-4">Lecturer(s)</th>
+                            <th class="p-4 text-center">Responses</th>
+                            <th class="p-4 text-center">Mean Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant text-sm">
+                        {% for item in courses_data %}
+                            <tr class="hover:bg-surface-container-low/10 transition-colors">
+                                <td class="p-4 font-mono font-bold text-primary">{{ item.course.code }}</td>
+                                <td class="p-4 font-bold text-primary">{{ item.course.title }}</td>
+                                <td class="p-4 text-outline">{{ item.course.department.name }}</td>
+                                <td class="p-4">
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for lect in item.lecturers %}
+                                            <span class="text-[10px] font-bold bg-surface-container-high text-primary px-2 py-0.5 rounded">
+                                                {{ lect.get_full_name|default:lect.username }}
+                                            </span>
+                                        {% empty %}
+                                            <span class="text-[10px] font-bold bg-red-50 text-error border border-red-200 px-2 py-0.5 rounded">
+                                                Unclaimed
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td class="p-4 text-center font-semibold text-primary">{{ item.response_count }}</td>
+                                <td class="p-4 text-center">
+                                    {% if item.enough_responses %}
+                                        <span class="inline-block text-xs font-bold bg-green-50 text-success border border-green-200 px-2.5 py-1 rounded-full">
+                                            {{ item.mean_score|default:"0.00" }} / 5.0
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-block text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                                            Pending ({{ item.response_count }}/10)
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="p-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <span class="material-symbols-outlined text-4xl text-outline mb-2">folder_open</span>
+                                        <h4 class="font-bold text-primary mb-1">No Results Found</h4>
+                                        <p class="text-xs text-outline max-w-sm mx-auto leading-relaxed">
+                                            No courses matched the chosen filter criteria for this semester.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

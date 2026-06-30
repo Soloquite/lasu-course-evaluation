@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Anonymity Compliance Audit — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+    <!-- Back breadcrumb -->
+    <div class="flex items-center">
+        <a href="{% url 'evaluations:admin_dashboard' %}" class="flex items-center gap-1.5 text-sm font-semibold text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant pb-6">
+        <div>
+            <h2 class="font-display-lg text-3xl font-extrabold text-primary mb-1">Anonymity Compliance Report</h2>
+            <p class="text-sm text-outline">Verifiable proof of schema-level separation and security compliance.</p>
+        </div>
+        <div>
+            <a href="?packet=markdown&timestamp={% now 'Y-m-d_H:i:s' %}" 
+               class="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-full hover:bg-primary-container transition-all text-sm font-semibold shadow-sm focus:outline-none">
+                <span class="material-symbols-outlined text-sm">archive</span>
+                Download Audit Packet
+            </a>
+        </div>
+    </div>
+
+    <!-- Section 1: Schema Introspection -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low/20">
+            <h3 class="font-title-md text-base font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">schema</span>
+                1. Database Schema Introspection
+            </h3>
+            {% if schema_safe %}
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-success bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                    Verified Secure
+                </span>
+            {% else %}
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-error bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                    Audit Failed
+                </span>
+            {% endif %}
+        </div>
+        
+        <div class="p-6 space-y-6">
+            <p class="text-sm text-outline leading-relaxed">
+                We inspect the fields of <strong class="text-primary font-bold">EvaluationResponse</strong> to verify that there are no columns linking a feedback row back to a student or SubmissionRecord.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-container-low/30 rounded-xl p-6 border border-outline-variant">
+                <div>
+                    <h4 class="text-xs uppercase tracking-wider font-bold text-outline mb-3">EvaluationResponse Columns</h4>
+                    <ul class="space-y-1 text-xs font-mono text-primary">
+                        {% for field in response_fields %}
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
+                                {{ field }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xs uppercase tracking-wider font-bold text-outline mb-3">SubmissionRecord Columns (Identity)</h4>
+                    <ul class="space-y-1 text-xs font-mono text-primary">
+                        {% for field in submission_fields %}
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
+                                {{ field }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            {% if schema_safe %}
+                <div class="flex items-start gap-3 p-4 border rounded-xl bg-green-50 text-success border-green-200 text-xs">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    <div>
+                        <h4 class="font-bold mb-0.5">Verification Successful</h4>
+                        <p class="leading-relaxed text-success/80">
+                            Zero user-identifying relations found in the feedback response table. The column intersection is strictly constrained to course/session grouping tags.
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="flex items-start gap-3 p-4 border rounded-xl bg-error-container text-on-error-container border-error/20 text-xs">
+                    <span class="material-symbols-outlined text-base">error</span>
+                    <div>
+                        <h4 class="font-bold mb-0.5">Regressed Relationship Found</h4>
+                        <p class="leading-relaxed text-on-error-container/80 mb-2">The following link(s) must be removed immediately:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            {% for link in unwanted_links %}
+                                <li>{{ link }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Section 2: On-Demand Proof Tests -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low/20">
+            <h3 class="font-title-md text-base font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">done_all</span>
+                2. Automated Proof Tests
+            </h3>
+            {% if tests_passed %}
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-success bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                    Passed ({{ tests_run }}/{{ tests_run }})
+                </span>
+            {% else %}
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-error bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                    Failed
+                </span>
+            {% endif %}
+        </div>
+        
+        <div class="p-6 space-y-4">
+            <p class="text-sm text-outline leading-relaxed">
+                Executes the system's compliance test suite on-demand to test for schema path isolation, cartesian join products, and query safety.
+            </p>
+            
+            <pre class="bg-primary text-on-primary-container p-6 rounded-xl font-mono text-xs overflow-x-auto max-h-[300px] border border-outline">{{ test_log }}</pre>
+        </div>
+    </div>
+
+    <!-- Section 3: AST Code Audit -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low/20">
+            <h3 class="font-title-md text-base font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">code</span>
+                3. Abstract Syntax Tree (AST) Code Audit
+            </h3>
+            {% if not ast_violations %}
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-success bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                    Verified Compliant
+                </span>
+            {% else %}
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-error bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                    Violations Found
+                </span>
+            {% endif %}
+        </div>
+        
+        <div class="p-6 space-y-4">
+            <p class="text-sm text-outline leading-relaxed">
+                Analyzes the backend code structure in <code>views.py</code> using compiler AST parsing to ensure no developer writes a query combining student profiles with anonymous feedback.
+            </p>
+            
+            {% if not ast_violations %}
+                <div class="flex items-start gap-3 p-4 border rounded-xl bg-green-50 text-success border-green-200 text-xs">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    <div>
+                        <h4 class="font-bold mb-0.5">AST Verification Successful</h4>
+                        <p class="leading-relaxed text-success/80">
+                            Query scopes in response analytics functions (reports and summaries) do not invoke or fetch student context info.
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="flex items-start gap-3 p-4 border rounded-xl bg-error-container text-on-error-container border-error/20 text-xs">
+                    <span class="material-symbols-outlined text-base">error</span>
+                    <div>
+                        <h4 class="font-bold mb-0.5">AST Audit Alerts</h4>
+                        <p class="leading-relaxed text-on-error-container/80 mb-2">The compiler identified code access paths that link to student context:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            {% for violation in ast_violations %}
+                                <li>{{ violation }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

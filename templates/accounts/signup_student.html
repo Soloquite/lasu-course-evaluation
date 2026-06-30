@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Registration — LASU Course Evaluation{% endblock %}
+
+{% block guest_header %}{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-xl bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_12px_rgba(0,51,102,0.05)] p-8">
+    <div class="text-center mb-6">
+        {% load static %}
+        <img alt="LASU Institutional Logo" class="h-16 w-auto object-contain mx-auto mb-4" src="{% static 'images/logo.png' %}"/>
+        <h2 class="font-title-md text-title-md text-primary font-extrabold mb-1">Student Registration</h2>
+        <p class="text-sm text-outline">Create your student account to evaluate courses</p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="flex flex-col gap-1 p-4 mb-4 border rounded-xl bg-error-container text-on-error-container border-error/20">
+            {% for error in form.non_field_errors %}
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-error text-sm">error</span>
+                    <span class="text-sm font-medium">{{ error }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4" novalidate>
+        {% csrf_token %}
+
+        <!-- Name Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-label-md text-label-md text-primary mb-1" for="id_first_name">First Name</label>
+                <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                       id="id_first_name" 
+                       name="first_name" 
+                       type="text" 
+                       placeholder="e.g. John"
+                       value="{{ form.first_name.value|default:'' }}" 
+                       required/>
+                {% if form.first_name.errors %}
+                    {% for error in form.first_name.errors %}
+                        <p class="text-xs text-error mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label class="block font-label-md text-label-md text-primary mb-1" for="id_last_name">Last Name</label>
+                <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                       id="id_last_name" 
+                       name="last_name" 
+                       type="text" 
+                       placeholder="e.g. Doe"
+                       value="{{ form.last_name.value|default:'' }}" 
+                       required/>
+                {% if form.last_name.errors %}
+                    {% for error in form.last_name.errors %}
+                        <p class="text-xs text-error mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Matric Number -->
+        <div>
+            <label class="block font-label-md text-label-md text-primary mb-1" for="id_matric_number">Matric Number</label>
+            <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                   id="id_matric_number" 
+                   name="matric_number" 
+                   type="text" 
+                   placeholder="e.g. 21010101010"
+                   value="{{ form.matric_number.value|default:'' }}" 
+                   required/>
+            {% if form.matric_number.errors %}
+                {% for error in form.matric_number.errors %}
+                    <p class="text-xs text-error mt-1">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="block font-label-md text-label-md text-primary mb-1" for="id_email">Email <span class="text-outline font-normal">(optional)</span></label>
+            <input class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                   id="id_email" 
+                   name="email" 
+                   type="email" 
+                   placeholder="e.g. student@lasu.edu.ng"
+                   value="{{ form.email.value|default:'' }}"/>
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <p class="text-xs text-error mt-1">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Faculty & Department Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-label-md text-label-md text-primary mb-1" for="id_faculty">Faculty</label>
+                <select class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary"
+                        id="id_faculty" 
+                        name="faculty" 
+                        required>
+                    <option value="">Select Faculty</option>
+                    {% for choice in form.fields.faculty.choices %}
+                        {% if choice.0 %}
+                            <option value="{{ choice.0 }}" {% if form.faculty.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                {% if form.faculty.errors %}
+                    {% for error in form.faculty.errors %}
+                        <p class="text-xs text-error mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label class="block font-label-md text-label-md text-primary mb-1" for="id_department">Department</label>
+                <select class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary"
+                        id="id_department" 
+                        name="department" 
+                        required>
+                    <option value="">Select Department</option>
+                    {% for choice in form.fields.department.choices %}
+                        {% if choice.0 %}
+                            <option value="{{ choice.0 }}" {% if form.department.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                {% if form.department.errors %}
+                    {% for error in form.department.errors %}
+                        <p class="text-xs text-error mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Level -->
+        <div>
+            <label class="block font-label-md text-label-md text-primary mb-1" for="id_level">Level</label>
+            <select class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary"
+                    id="id_level" 
+                    name="level" 
+                    required>
+                <option value="">Select Level</option>
+                {% for choice in form.fields.level.choices %}
+                    {% if choice.0 %}
+                        <option value="{{ choice.0 }}" {% if form.level.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            {% if form.level.errors %}
+                {% for error in form.level.errors %}
+                    <p class="text-xs text-error mt-1">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Passwords Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block font-label-md text-label-md text-primary mb-1" for="id_password1">Password</label>
+                <div class="relative">
+                    <input class="w-full pl-3 pr-10 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                           id="id_password1" 
+                           name="password1" 
+                           type="password" 
+                           placeholder="••••••••" 
+                           required/>
+                    <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary focus:outline-none" type="button" onclick="togglePasswordVisibility('id_password1', 'passwordVisibilityIcon1')">
+                        <span id="passwordVisibilityIcon1" class="material-symbols-outlined text-xl">visibility</span>
+                    </button>
+                </div>
+                {% if form.password1.errors %}
+                    {% for error in form.password1.errors %}
+                        <p class="text-xs text-error mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div>
+                <label class="block font-label-md text-label-md text-primary mb-1" for="id_password2">Confirm Password</label>
+                <div class="relative">
+                    <input class="w-full pl-3 pr-10 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                           id="id_password2" 
+                           name="password2" 
+                           type="password" 
+                           placeholder="••••••••" 
+                           required/>
+                    <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary focus:outline-none" type="button" onclick="togglePasswordVisibility('id_password2', 'passwordVisibilityIcon2')">
+                        <span id="passwordVisibilityIcon2" class="material-symbols-outlined text-xl">visibility</span>
+                    </button>
+                </div>
+                {% if form.password2.errors %}
+                    {% for error in form.password2.errors %}
+                        <p class="text-xs text-error mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <button class="w-full py-3 bg-primary text-on-primary font-label-md text-label-md rounded shadow-[0_4px_12px_rgba(0,51,102,0.1)] hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2 mt-6 focus:outline-none" type="submit">
+            Create Account
+            <span class="material-symbols-outlined">person_add</span>
+        </button>
+    </form>
+
+    <div class="mt-6 text-center border-t border-outline-variant pt-4">
+        <p class="text-sm text-outline">
+            Already have an account? <a class="font-label-md text-label-md text-primary hover:underline ml-1" href="{% url 'accounts:login' %}">Log In</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePasswordVisibility(inputId, iconId) {
+    var pwd = document.getElementById(inputId);
+    var icon = document.getElementById(iconId);
+    if (pwd && icon) {
+        if (pwd.type === "password") {
+            pwd.type = "text";
+            icon.innerText = "visibility_off";
+        } else {
+            pwd.type = "password";
+            icon.innerText = "visibility";
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const facultySelect = document.getElementById('id_faculty');
+    const deptSelect = document.getElementById('id_department');
+
+    if (!facultySelect || !deptSelect) return;
+
+    facultySelect.addEventListener('change', function() {
+        const facultyId = this.value;
+        deptSelect.innerHTML = '<option value="">Select Department</option>';
+
+        if (!facultyId) return;
+
+        fetch('/accounts/api/departments/?faculty_id=' + encodeURIComponent(facultyId))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                data.departments.forEach(function(d) {
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.textContent = d.name;
+                    deptSelect.appendChild(opt);
+                });
+            });
+    });
+});
+</script>
+{% endblock %}

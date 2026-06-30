@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}LASU Course Evaluation System{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-container-max mx-auto py-12 md:py-20 flex flex-col items-center">
+    <!-- Hero Section -->
+    <div class="text-center max-w-2xl mx-auto space-y-6 mb-16">
+        <span class="text-xs uppercase tracking-wider font-bold text-primary bg-primary-fixed px-3 py-1 rounded-full">
+            Lagos State University Portal
+        </span>
+        <h2 class="font-display-lg text-4xl md:text-5xl font-extrabold text-primary leading-tight tracking-tight">
+            Your Voice.<br>Their Academic Growth.
+        </h2>
+        <p class="text-base md:text-lg text-outline leading-relaxed">
+            Help improve the quality of teaching at Lagos State University through anonymous, structured course evaluations. Your honest feedback is confidential and drives real change.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+            <a href="{% url 'accounts:role_select' %}" class="px-6 py-3 bg-primary text-on-primary font-semibold text-sm rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all shadow-sm focus:outline-none flex items-center justify-center gap-2">
+                Get Started
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+            <a href="{% url 'accounts:login' %}" class="px-6 py-3 border border-outline text-primary font-semibold text-sm rounded-full hover:bg-surface-container-low transition-all flex items-center justify-center">
+                Log In
+            </a>
+        </div>
+    </div>
+
+    <!-- Feature Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8">
+        <!-- Card 1 -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed mx-auto mb-4">
+                <span class="material-symbols-outlined text-2xl">shield</span>
+            </div>
+            <h3 class="font-title-md text-base font-bold text-primary mb-2">Truly Anonymous</h3>
+            <p class="text-xs md:text-sm text-outline leading-relaxed">
+                Your identity is never linked to your responses. Compliance tests verify schema-level separation by design, protecting your privacy.
+            </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-primary mx-auto mb-4">
+                <span class="material-symbols-outlined text-2xl">bar_chart</span>
+            </div>
+            <h3 class="font-title-md text-base font-bold text-primary mb-2">Data-Driven Insights</h3>
+            <p class="text-xs md:text-sm text-outline leading-relaxed">
+                Feedback summaries are threshold-gated (n &ge; 10) and comments are randomized to prevent individual identification.
+            </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary mx-auto mb-4">
+                <span class="material-symbols-outlined text-2xl">bolt</span>
+            </div>
+            <h3 class="font-title-md text-base font-bold text-primary mb-2">Quick & Simple</h3>
+            <p class="text-xs md:text-sm text-outline leading-relaxed">
+                Evaluate each course in under two minutes. Submit evaluations seamlessly from any desktop or mobile device.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

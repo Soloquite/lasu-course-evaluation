@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.code }} Summary — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+    <!-- Back breadcrumb -->
+    <div class="flex items-center">
+        <a href="{% url 'evaluations:lecturer_dashboard' %}" class="flex items-center gap-1.5 text-sm font-semibold text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant pb-6">
+        <div>
+            <span class="text-xs font-mono font-bold bg-surface-container-high text-primary px-2.5 py-1 rounded mb-2 inline-block">
+                {{ course.code }} Evaluation Results
+            </span>
+            <h2 class="font-display-lg text-3xl font-extrabold text-primary mb-1">{{ course.title }}</h2>
+            <p class="text-sm text-outline">Department: {{ course.department.name }} &bull; Semester: {{ session.title }}</p>
+        </div>
+        
+        <div>
+            <!-- Session filter select -->
+            <form method="get" class="flex gap-2">
+                <select name="session" class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-label-md text-label-md text-primary" onchange="this.form.submit()">
+                    {% for s in sessions %}
+                        <option value="{{ s.id }}" {% if s.id == session.id %}selected{% endif %}>{{ s.title }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    {% if not enough_responses %}
+        <!-- Threshold pending block -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-12 text-center shadow-sm">
+            <span class="material-symbols-outlined text-5xl text-outline mb-4">analytics</span>
+            <h3 class="text-xl font-bold text-primary mb-2">Results Pending</h3>
+            <p class="text-sm text-outline max-w-md mx-auto leading-relaxed mb-6">
+                This course has collected <strong class="text-primary font-bold">{{ response_count }}</strong> responses. A minimum of <strong class="text-primary font-bold">{{ required_count }}</strong> responses is required before aggregated summaries or student comments become visible to protect privacy.
+            </p>
+            
+            <div class="max-w-xs mx-auto space-y-2">
+                <div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-primary h-full rounded-full transition-all duration-500" 
+                         style="width: {% widthratio response_count required_count 100 %}%;"></div>
+                </div>
+                <div class="flex justify-between items-center text-xs font-semibold text-outline">
+                    <span>Threshold Progress</span>
+                    <span>{% widthratio response_count required_count 100 %}% Completed</span>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Stats overview cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="border border-outline-variant rounded-xl p-6 bg-surface-container-low/30">
+                <p class="text-4xl font-extrabold text-success mb-1">{{ response_count }}</p>
+                <p class="text-xs font-semibold text-outline uppercase tracking-wider">Total Submissions</p>
+            </div>
+            <div class="border border-outline-variant rounded-xl p-6 bg-surface-container-low/30">
+                <p class="text-4xl font-extrabold text-primary mb-1">n &ge; 10</p>
+                <p class="text-xs font-semibold text-outline uppercase tracking-wider">Anonymity Gate</p>
+            </div>
+            <div class="border border-outline-variant rounded-xl p-6 bg-surface-container-low/30">
+                <p class="text-4xl font-extrabold text-primary mb-1">Verifiable</p>
+                <p class="text-xs font-semibold text-outline uppercase tracking-wider">Response Isolation</p>
+            </div>
+        </div>
+
+        <!-- Quantitative ratings section -->
+        <div class="space-y-4">
+            <h3 class="font-title-md text-xl font-extrabold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">bar_chart</span>
+                Quantitative Evaluation Summaries
+            </h3>
+            
+            <div class="grid grid-cols-1 gap-4">
+                {% for item in ratings_data %}
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <h4 class="text-base font-bold text-primary leading-snug mb-2">{{ item.question.text }}</h4>
+                            
+                            <!-- Rating visual progress indicator bar -->
+                            <div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-primary h-full rounded-full transition-all" 
+                                     style="width: {% widthratio item.mean 5 100 %}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-shrink-0 flex items-center md:flex-col md:items-end justify-between sm:justify-start gap-2">
+                            <span class="text-2xl font-extrabold text-primary">{{ item.mean|default:"0.00" }}</span>
+                            <span class="text-xs text-outline font-medium">Mean / 5.0</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Qualitative open comments section -->
+        <div class="space-y-6 pt-4">
+            <h3 class="font-title-md text-xl font-extrabold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">chat_bubble</span>
+                Open-Ended Feedback Comments
+            </h3>
+            
+            <div class="space-y-8">
+                {% for text_item in text_data %}
+                    <div class="space-y-3">
+                        <h4 class="text-sm uppercase tracking-wider font-bold text-outline border-l-2 border-primary pl-3">
+                            {{ text_item.question.text }}
+                        </h4>
+                        
+                        <div class="grid grid-cols-1 gap-3">
+                            {% for comment in text_item.comments %}
+                                <div class="bg-surface-container-low/30 border border-outline-variant rounded-xl p-4 text-primary text-sm leading-relaxed italic">
+                                    "{{ comment }}"
+                                </div>
+                            {% empty %}
+                                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 text-center text-outline text-sm shadow-sm">
+                                    No textual response comments submitted for this question.
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

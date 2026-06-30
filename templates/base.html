@@ -1,0 +1,310 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description" content="LASU Online Course Evaluation System — anonymous, structured feedback for continuous improvement.">
+    <title>{% block title %}LASU Course Evaluation{% endblock %}</title>
+    
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS v3 via CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#1b1f20",
+                        "inverse-primary": "#a7c8ff",
+                        "on-tertiary-container": "#999c9e",
+                        "inverse-surface": "#233144",
+                        "on-tertiary-fixed": "#191c1e",
+                        "tertiary-container": "#303436",
+                        "on-secondary-fixed": "#241a00",
+                        "secondary": "#745b00",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed": "#d5e3ff",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#c3c6d1",
+                        "on-primary-fixed-variant": "#1f477b",
+                        "surface-container-highest": "#d5e3fc",
+                        "secondary-fixed": "#ffe08b",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#799dd6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "outline": "#737780",
+                        "primary-container": "#003366",
+                        "on-primary-fixed": "#001b3c",
+                        "surface-tint": "#3a5f94",
+                        "surface-variant": "#d5e3fc",
+                        "surface": "#f8f9ff",
+                        "on-background": "#0d1c2e",
+                        "secondary-container": "#fecb00",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#e6eeff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#584400",
+                        "on-secondary-container": "#6e5700",
+                        "tertiary-fixed": "#e0e3e5",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#43474f",
+                        "surface-dim": "#ccdbf3",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#a7c8ff",
+                        "on-surface": "#0d1c2e",
+                        "secondary-fixed-dim": "#f1c100",
+                        "primary": "#001e40",
+                        "surface-container-high": "#dce9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "container-max": "1280px",
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "title-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c3c6d1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #737780; 
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col {% if user.is_authenticated %}lg:flex-row{% endif %}">
+
+    {% if user.is_authenticated %}
+        <!-- NavigationDrawer (Hidden on Mobile, Visible on Desktop) -->
+        <nav id="navMenu" class="fixed left-0 top-0 h-full z-40 hidden lg:flex flex-col bg-surface-container-low text-primary w-80 shadow-sm border-r border-outline-variant transition-all duration-300 ease-in-out">
+            <div class="p-6 flex items-center justify-center border-b border-outline-variant w-full">
+                <img alt="LASU Institutional Logo" class="h-10 w-auto object-contain" src="{% static 'images/logo.png' %}"/>
+            </div>
+            
+            <div class="p-6 flex flex-col items-start border-b border-outline-variant w-full">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-primary">{{ user.get_full_name|default:user.username }}</h2>
+                        <p class="text-xs text-outline">{{ user.role|title }} Portal</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto py-4">
+                <ul class="flex flex-col gap-1 px-2">
+                    {% if user.role == 'STUDENT' %}
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'student_dashboard' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'evaluations:student_dashboard' %}">
+                                <span class="material-symbols-outlined">assignment</span>
+                                <span class="font-label-md text-label-md">Evaluations</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'search_courses' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'evaluations:search_courses' %}">
+                                <span class="material-symbols-outlined">search</span>
+                                <span class="font-label-md text-label-md">Course Search</span>
+                            </a>
+                        </li>
+                    {% elif user.role == 'LECTURER' %}
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'lecturer_dashboard' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'evaluations:lecturer_dashboard' %}">
+                                <span class="material-symbols-outlined">dashboard</span>
+                                <span class="font-label-md text-label-md">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'claim_courses' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'courses:claim_courses' %}">
+                                <span class="material-symbols-outlined">add_circle</span>
+                                <span class="font-label-md text-label-md">Claim Courses</span>
+                            </a>
+                        </li>
+                    {% elif user.role == 'ADMIN' %}
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'evaluations:admin_dashboard' %}">
+                                <span class="material-symbols-outlined">dashboard</span>
+                                <span class="font-label-md text-label-md">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'admin_sessions' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'evaluations:admin_sessions' %}">
+                                <span class="material-symbols-outlined">calendar_today</span>
+                                <span class="font-label-md text-label-md">Sessions</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'admin_reports' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'evaluations:admin_reports' %}">
+                                <span class="material-symbols-outlined">analytics</span>
+                                <span class="font-label-md text-label-md">Results & Reports</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors {% if request.resolver_match.url_name == 'audit_anonymity' %}bg-primary-fixed text-on-primary-fixed{% else %}text-on-surface-variant{% endif %}" href="{% url 'evaluations:audit_anonymity' %}">
+                                <span class="material-symbols-outlined">shield</span>
+                                <span class="font-label-md text-label-md">Anonymity Audit</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-3 rounded-full hover:bg-surface-container-highest transition-colors text-on-surface-variant" href="/admin/">
+                                <span class="material-symbols-outlined">settings</span>
+                                <span class="font-label-md text-label-md">Django Admin</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="p-4 border-t border-outline-variant mt-auto">
+                <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:text-primary transition-colors bg-transparent border-0 cursor-pointer focus:outline-none">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span class="font-label-md text-label-md">Sign Out</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Mobile Drawer Backdrop & Overlay -->
+        <div id="mobileBackdrop" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" onclick="toggleMobileMenu()"></div>
+    {% endif %}
+
+    <!-- Main Content Area (Unified structure) -->
+    <div class="flex-1 flex flex-col {% if user.is_authenticated %}lg:ml-80{% endif %} min-h-screen">
+        
+        {% if user.is_authenticated %}
+            <!-- TopAppBar -->
+            <header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-6 py-4 z-30 sticky top-0">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile Menu Button (Hidden on Desktop) -->
+                    <button class="lg:hidden text-on-surface hover:text-primary focus:outline-none" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <a href="/" class="flex items-center gap-3">
+                        <span class="font-title-md text-title-md text-primary font-bold">LASU Course Evaluation</span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-label-md bg-surface-container-high px-3 py-1 rounded-full text-primary">{{ user.role }}</span>
+                </div>
+            </header>
+        {% else %}
+            <!-- Top Navigation (Logged out) -->
+            {% block guest_header %}
+            <header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-6 py-4 z-30 sticky top-0">
+                <div class="flex items-center gap-3">
+                    <a href="/" class="flex items-center gap-3">
+                        <img alt="LASU Institutional Logo" class="h-8 w-auto object-contain hidden lg:block" src="{% static 'images/logo.png' %}"/>
+                        <span class="font-title-md text-title-md text-primary font-bold">LASU Course Evaluation</span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'accounts:login' %}" class="px-4 py-2 text-sm font-label-md text-primary hover:bg-surface-container-low rounded-full transition-all">Log In</a>
+                    <a href="{% url 'accounts:role_select' %}" class="px-4 py-2 text-sm font-label-md bg-primary text-on-primary rounded-full hover:bg-primary-container transition-all">Sign Up</a>
+                </div>
+            </header>
+            {% endblock %}
+        {% endif %}
+
+        <!-- Django messages -->
+        {% if messages %}
+        <div class="px-6 pt-4 {% if user.is_authenticated %}max-w-container-max{% else %}max-w-md{% endif %} mx-auto w-full">
+            {% for message in messages %}
+            <div class="flex items-center gap-3 p-4 mb-3 border rounded-xl {% if message.tags == 'error' %}bg-error-container text-on-error-container border-error/20{% elif message.tags == 'success' %}bg-surface-container-high text-primary border-outline-variant{% else %}bg-surface-container-low text-on-surface border-outline-variant{% endif %}">
+                <span class="material-symbols-outlined">info</span>
+                <span class="text-sm font-medium">{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Unified page content wrapper -->
+        <main class="flex-1 p-6 w-full {% if user.is_authenticated %}max-w-container-max mx-auto{% else %}flex items-center justify-center{% endif %}">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-surface border-t border-outline-variant py-4 text-center mt-auto w-full">
+            <p class="font-label-sm text-label-sm text-on-surface-variant">&copy; {% now 'Y' %} Lagos State University. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Mobile Drawer Scripts -->
+    <script>
+        function toggleMobileMenu() {
+            var nav = document.getElementById("navMenu");
+            var backdrop = document.getElementById("mobileBackdrop");
+            if (nav && backdrop) {
+                if (nav.classList.contains("hidden")) {
+                    nav.classList.remove("hidden");
+                    nav.classList.add("flex", "fixed", "left-0", "top-0", "h-full", "w-80", "z-40");
+                    backdrop.classList.remove("hidden");
+                } else {
+                    nav.classList.add("hidden");
+                    nav.classList.remove("flex", "fixed", "left-0", "top-0", "h-full", "w-80", "z-40");
+                    backdrop.classList.add("hidden");
+                }
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

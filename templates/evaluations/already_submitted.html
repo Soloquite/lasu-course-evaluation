@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Already Submitted — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-lg bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_12px_rgba(0,51,102,0.05)] p-8 text-center">
+    <div class="w-20 h-20 rounded-full bg-amber-50 border-4 border-amber-200 flex items-center justify-center text-amber-500 mx-auto mb-6">
+        <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">warning</span>
+    </div>
+    
+    <p class="text-xs uppercase tracking-wider font-bold text-amber-600 mb-2">Submission Blocked</p>
+    <h2 class="font-display-lg text-2xl font-extrabold text-primary mb-4">Already Evaluated</h2>
+    
+    <p class="text-sm text-outline leading-relaxed max-w-md mx-auto mb-8">
+        You have already submitted an evaluation response for <strong class="text-primary font-bold">{{ course.code }} ({{ course.title }})</strong> in this active session. Double submissions are blocked to protect data integrity.
+    </p>
+
+    <a href="{% url 'evaluations:student_dashboard' %}" class="w-full py-3 bg-primary text-on-primary font-label-md text-label-md rounded shadow-sm hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2 focus:outline-none">
+        Return to Dashboard
+        <span class="material-symbols-outlined text-sm">home</span>
+    </a>
+</div>
+{% endblock %}

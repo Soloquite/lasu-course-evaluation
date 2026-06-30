@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Claim Courses — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+    <!-- Back breadcrumb -->
+    <div class="flex items-center">
+        <a href="{% url 'evaluations:lecturer_dashboard' %}" class="flex items-center gap-1.5 text-sm font-semibold text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="border-b border-outline-variant pb-6">
+        <h2 class="font-display-lg text-3xl font-extrabold text-primary mb-1">Claim Courses</h2>
+        <p class="text-sm text-outline">Select the courses you teach in the <strong class="text-primary font-bold">{{ department.name }}</strong> department.</p>
+    </div>
+
+    <!-- Claim Panel -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="flex items-start gap-3 p-4 border rounded-xl bg-surface-container-low text-primary border-outline-variant text-sm">
+                <span class="material-symbols-outlined text-lg">info</span>
+                <p class="leading-relaxed text-outline">
+                    Check all courses you instruct (co-teaching is supported — multiple lecturers can claim the same course). Claimed courses will appear on your dashboard for monitoring.
+                </p>
+            </div>
+
+            <!-- Courses list -->
+            <div class="border border-outline-variant rounded-xl overflow-hidden divide-y divide-outline-variant">
+                {% for item in courses_data %}
+                    <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors {% if item.is_claimed %}bg-primary-fixed/10{% endif %}">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1">
+                                <input type="checkbox" 
+                                       name="course_ids" 
+                                       value="{{ item.course.id }}" 
+                                       id="course_{{ item.course.id }}" 
+                                       class="rounded text-primary focus:ring-primary border-outline-variant h-5 w-5 {% if item.is_claimed %}opacity-50 cursor-not-allowed{% else %}cursor-pointer{% endif %}"
+                                       {% if item.is_claimed %}checked disabled{% endif %}>
+                            </div>
+                            <label for="course_{{ item.course.id }}" class="{% if item.is_claimed %}cursor-not-allowed{% else %}cursor-pointer{% endif %} block">
+                                <span class="text-sm font-mono font-bold bg-surface-container-high text-primary px-2 py-0.5 rounded inline-block mb-1">
+                                    {{ item.course.code }}
+                                </span>
+                                <span class="text-base font-bold text-primary block sm:inline-block sm:ml-2">{{ item.course.title }}</span>
+                                <span class="text-xs text-outline block mt-1">Level {{ item.course.level }} &bull; Semester: {{ item.course.semester }}</span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex-shrink-0">
+                            {% if item.is_claimed %}
+                                <span class="flex items-center gap-1 text-xs font-semibold text-success bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                    Claimed by You
+                                </span>
+                            {% elif item.claim_count > 0 %}
+                                <span class="flex items-center gap-1 text-xs font-semibold text-primary bg-surface-container-high px-2.5 py-1 rounded-full border border-outline-variant">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                    {{ item.claim_count }} claim(s) by others
+                                </span>
+                            {% else %}
+                                <span class="text-xs font-semibold text-outline bg-surface-container-low px-2.5 py-1 rounded-full border border-outline-variant">
+                                    Unclaimed
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="p-12 text-center">
+                        <span class="material-symbols-outlined text-5xl text-outline mb-4">folder_open</span>
+                        <h3 class="text-lg font-bold text-primary mb-2">No Department Courses Available</h3>
+                        <p class="text-sm text-outline max-w-md mx-auto leading-relaxed">
+                            No courses have been configured for your department in this session. Please ask a system administrator to verify department course allocation.
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if courses_data %}
+                <div class="flex items-center justify-between border-t border-outline-variant pt-6">
+                    <a href="{% url 'evaluations:lecturer_dashboard' %}" class="px-5 py-2.5 border border-outline text-primary hover:bg-surface-container-low font-semibold text-sm rounded-xl transition-all">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-6 py-2.5 bg-primary text-on-primary font-semibold text-sm rounded-xl hover:bg-primary-container hover:text-on-primary-container transition-all shadow-sm focus:outline-none flex items-center gap-1.5">
+                        Confirm Claims
+                        <span class="material-symbols-outlined text-sm">verified</span>
+                    </button>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant pb-6">
+        <div>
+            <h2 class="font-display-lg text-3xl font-extrabold text-primary mb-1">My Dashboard</h2>
+            <p class="text-sm text-outline">
+                Active Session: 
+                {% if active_session %}
+                    <span class="font-semibold text-primary bg-primary-fixed px-2.5 py-0.5 rounded-full text-xs">{{ active_session.title }}</span>
+                {% else %}
+                    <span class="font-semibold text-error bg-error-container px-2.5 py-0.5 rounded-full text-xs">No Active Session</span>
+                {% endif %}
+            </p>
+        </div>
+        {% if active_session %}
+            <a href="{% url 'evaluations:search_courses' %}" class="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-full hover:bg-primary-container transition-all text-sm font-semibold shadow-sm focus:outline-none">
+                <span class="material-symbols-outlined text-sm">search</span>
+                Find & Add Course
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Active Window / Empty Status -->
+    {% if not active_session %}
+        <div class="border border-outline-variant rounded-xl p-12 text-center bg-surface-container-low/50">
+            <span class="material-symbols-outlined text-5xl text-outline mb-4">lock</span>
+            <h3 class="text-lg font-bold text-primary mb-2">No Active Evaluation Window</h3>
+            <p class="text-sm text-outline max-w-md mx-auto leading-relaxed">
+                There are no open course evaluation windows at this time. Please check back later when an administrator starts the session.
+            </p>
+        </div>
+    {% else %}
+        <!-- Course Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in courses_data %}
+                <div class="border border-outline-variant rounded-xl bg-surface-container-low/30 hover:border-primary hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between gap-2 mb-4">
+                            <span class="text-xs font-mono font-bold bg-surface-container-high text-primary px-2.5 py-1 rounded">
+                                {{ item.course.code }}
+                            </span>
+                            {% if item.submitted %}
+                                <span class="flex items-center gap-1 text-xs font-semibold text-success bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                    Submitted
+                                </span>
+                            {% else %}
+                                <span class="flex items-center gap-1 text-xs font-semibold text-error bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                    Pending
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <h3 class="text-lg font-bold text-primary line-clamp-2 mb-1">{{ item.course.title }}</h3>
+                        <p class="text-xs text-outline line-clamp-1 mb-4">{{ item.course.department.name }}</p>
+
+                        <div class="flex items-center gap-2 mt-auto">
+                            {% if item.is_manual_addition %}
+                                <span class="text-[10px] uppercase tracking-wider font-bold bg-surface-container-highest text-primary px-2 py-0.5 rounded">
+                                    Manually Added
+                                </span>
+                            {% else %}
+                                <span class="text-[10px] uppercase tracking-wider font-bold bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded">
+                                    Core Course
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Footer Action -->
+                    <div class="bg-surface-container-low border-t border-outline-variant p-4 flex items-center justify-between">
+                        {% if item.submitted %}
+                            <a href="{% url 'evaluations:submission_confirmation' item.course.id %}" class="w-full text-center py-2 text-sm font-semibold border border-outline text-primary hover:bg-surface-container-low rounded-lg transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">receipt_long</span>
+                                View Confirmation
+                            </a>
+                        {% else %}
+                            <a href="{% url 'evaluations:evaluate_course' item.course.id %}" class="w-full text-center py-2 text-sm font-semibold bg-primary text-on-primary hover:bg-primary-container rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm">
+                                <span class="material-symbols-outlined text-sm">rate_review</span>
+                                Start Evaluation
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-full border border-outline-variant rounded-xl p-12 text-center bg-surface-container-low/50">
+                    <span class="material-symbols-outlined text-5xl text-outline mb-4">school</span>
+                    <h3 class="text-lg font-bold text-primary mb-2">No Registered Courses</h3>
+                    <p class="text-sm text-outline max-w-md mx-auto leading-relaxed mb-6">
+                        You don't have any registered courses for this semester yet. Search across faculties to manually add elective courses to your dashboard.
+                    </p>
+                    <a href="{% url 'evaluations:search_courses' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-full hover:bg-primary-container transition-all text-sm font-semibold shadow-sm focus:outline-none">
+                        <span class="material-symbols-outlined text-sm">search</span>
+                        Search Courses
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

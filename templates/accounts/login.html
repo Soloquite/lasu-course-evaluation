@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Login — LASU Course Evaluation{% endblock %}
+
+{% block guest_header %}{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_12px_rgba(0,51,102,0.05)] p-8">
+    <div class="flex justify-center mb-6">
+        {% load static %}
+        <img alt="LASU Institutional Logo" class="h-16 w-auto object-contain" src="{% static 'images/logo.png' %}"/>
+    </div>
+    
+    <div class="text-center mb-6">
+        <h2 class="font-title-md text-title-md text-primary font-extrabold mb-1">Welcome Back</h2>
+        <p class="text-sm text-outline">Sign in to access the Course Evaluation Portal</p>
+    </div>
+
+    <!-- Toggle Role Tabs (Visual Only, Updates Placeholders dynamically) -->
+    <div class="flex bg-surface-container-low p-1 rounded-lg mb-6 border border-outline-variant">
+        <button id="tabStudent" type="button" class="flex-1 py-2 font-label-md text-label-md rounded bg-surface-container-lowest text-primary shadow-sm border border-outline-variant transition-all focus:outline-none" onclick="selectRole('student')">Student</button>
+        <button id="tabStaff" type="button" class="flex-1 py-2 font-label-md text-label-md text-outline hover:text-primary transition-colors focus:outline-none" onclick="selectRole('staff')">Lecturer / Admin</button>
+    </div>
+
+    {% if error %}
+        <div class="flex items-center gap-3 p-4 mb-4 border rounded-xl bg-error-container text-on-error-container border-error/20">
+            <span class="material-symbols-outlined text-error">error</span>
+            <span class="text-sm font-medium">{{ error }}</span>
+        </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4" novalidate>
+        {% csrf_token %}
+
+        <div>
+            <label id="usernameLabel" class="block font-label-md text-label-md text-primary mb-1" for="id_username">Matric Number</label>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">badge</span>
+                <input class="w-full pl-10 pr-3 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                       id="id_username" 
+                       name="username" 
+                       placeholder="e.g. 21010101010" 
+                       required 
+                       type="text"/>
+            </div>
+            {% if form.username.errors %}
+                {% for err in form.username.errors %}
+                    <p class="text-xs text-error mt-1">{{ err }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <label class="block font-label-md text-label-md text-primary" for="id_password">Password</label>
+            </div>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">lock</span>
+                <input class="w-full pl-10 pr-10 py-2 bg-surface-container-lowest border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md text-primary placeholder-outline transition-shadow" 
+                       id="id_password" 
+                       name="password" 
+                       placeholder="••••••••" 
+                       required 
+                       type="password"/>
+                <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary focus:outline-none" type="button" onclick="togglePasswordVisibility()">
+                    <span id="passwordVisibilityIcon" class="material-symbols-outlined">visibility</span>
+                </button>
+            </div>
+            {% if form.password.errors %}
+                {% for err in form.password.errors %}
+                    <p class="text-xs text-error mt-1">{{ err }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <button class="w-full py-3 bg-primary text-on-primary font-label-md text-label-md rounded shadow-[0_4px_12px_rgba(0,51,102,0.1)] hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2 mt-6 focus:outline-none" type="submit">
+            Login
+            <span class="material-symbols-outlined">login</span>
+        </button>
+    </form>
+
+    <div class="mt-6 text-center border-t border-outline-variant pt-4">
+        <p class="text-sm text-outline">
+            New to the portal? <a class="font-label-md text-label-md text-primary hover:underline ml-1" href="{% url 'accounts:role_select' %}">Sign Up</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectRole(role) {
+        var tabStudent = document.getElementById("tabStudent");
+        var tabStaff = document.getElementById("tabStaff");
+        var label = document.getElementById("usernameLabel");
+        var input = document.getElementById("id_username");
+        
+        if (role === 'student') {
+            tabStudent.className = "flex-1 py-2 font-label-md text-label-md rounded bg-surface-container-lowest text-primary shadow-sm border border-outline-variant transition-all focus:outline-none";
+            tabStaff.className = "flex-1 py-2 font-label-md text-label-md text-outline hover:text-primary transition-colors focus:outline-none";
+            label.innerText = "Matric Number";
+            input.placeholder = "e.g. 21010101010";
+        } else {
+            tabStaff.className = "flex-1 py-2 font-label-md text-label-md rounded bg-surface-container-lowest text-primary shadow-sm border border-outline-variant transition-all focus:outline-none";
+            tabStudent.className = "flex-1 py-2 font-label-md text-label-md text-outline hover:text-primary transition-colors focus:outline-none";
+            label.innerText = "Staff ID / Username";
+            input.placeholder = "e.g. staff_id or admin";
+        }
+    }
+
+    function togglePasswordVisibility() {
+        var pwd = document.getElementById("id_password");
+        var icon = document.getElementById("passwordVisibilityIcon");
+        if (pwd && icon) {
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                icon.innerText = "visibility_off";
+            } else {
+                pwd.type = "password";
+                icon.innerText = "visibility";
+            }
+        }
+    }
+</script>
+{% endblock %}

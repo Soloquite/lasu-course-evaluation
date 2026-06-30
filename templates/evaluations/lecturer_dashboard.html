@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Lecturer Dashboard — LASU Course Evaluation{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant pb-6">
+        <div>
+            <h2 class="font-display-lg text-3xl font-extrabold text-primary mb-1">Lecturer Dashboard</h2>
+            <p class="text-sm text-outline">Manage your courses and view student evaluation feedback aggregates.</p>
+        </div>
+        <div>
+            <a href="{% url 'courses:claim_courses' %}" class="flex items-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-full hover:bg-primary-container transition-all text-sm font-semibold shadow-sm focus:outline-none">
+                <span class="material-symbols-outlined text-sm">add_circle</span>
+                Claim Courses
+            </a>
+        </div>
+    </div>
+
+    {% if not session %}
+        <div class="border border-outline-variant rounded-xl p-12 text-center bg-surface-container-low/50">
+            <span class="material-symbols-outlined text-5xl text-outline mb-4">lock</span>
+            <h3 class="text-lg font-bold text-primary mb-2">No Active Evaluation Session</h3>
+            <p class="text-sm text-outline max-w-md mx-auto leading-relaxed">
+                There are no open or configured course evaluation windows at this time. Please check back later.
+            </p>
+        </div>
+    {% else %}
+        <!-- Course Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in courses_data %}
+                <div class="border border-outline-variant rounded-xl bg-surface-container-low/30 hover:border-primary hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between gap-2 mb-4">
+                            <span class="text-xs font-mono font-bold bg-surface-container-high text-primary px-2.5 py-1 rounded">
+                                {{ item.course.code }}
+                            </span>
+                            
+                            {% if item.enough_responses %}
+                                <span class="flex items-center gap-1 text-xs font-semibold text-success bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                    Ready
+                                </span>
+                            {% else %}
+                                <span class="flex items-center gap-1 text-xs font-semibold text-error bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                    Collecting
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <h3 class="text-lg font-bold text-primary line-clamp-2 mb-1">{{ item.course.title }}</h3>
+                        <p class="text-xs text-outline line-clamp-1 mb-6">{{ item.course.department.name }}</p>
+
+                        <!-- Response Progress Bar -->
+                        <div class="space-y-2 border-t border-outline-variant/60 pt-4">
+                            <div class="flex justify-between items-center text-xs font-medium text-outline">
+                                <span>Responses Collected</span>
+                                <span class="font-bold text-primary">{{ item.response_count }} / 10</span>
+                            </div>
+                            
+                            <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                                <div class="{% if item.enough_responses %}bg-success{% else %}bg-primary{% endif %} h-full rounded-full transition-all duration-500" 
+                                     style="width: {% if item.response_count >= 10 %}100%{% else %}{{ item.response_count }}0%{% endif %};"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Action -->
+                    <div class="bg-surface-container-low border-t border-outline-variant p-4">
+                        {% if item.enough_responses %}
+                            <a href="{% url 'evaluations:lecturer_course_summary' item.course.id %}" class="w-full text-center py-2.5 text-sm font-semibold bg-primary text-on-primary hover:bg-primary-container rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm focus:outline-none">
+                                <span class="material-symbols-outlined text-sm">analytics</span>
+                                View Evaluation Results
+                            </a>
+                        {% else %}
+                            <button class="w-full text-center py-2.5 text-sm font-semibold border border-outline-variant text-outline bg-surface-container-low/60 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none" disabled>
+                                <span class="material-symbols-outlined text-sm">lock_clock</span>
+                                Pending Threshold ({{ item.response_count }}/10)
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-full border border-outline-variant rounded-xl p-12 text-center bg-surface-container-low/50">
+                    <span class="material-symbols-outlined text-5xl text-outline mb-4">co_present</span>
+                    <h3 class="text-lg font-bold text-primary mb-2">No Claimed Courses</h3>
+                    <p class="text-sm text-outline max-w-md mx-auto leading-relaxed mb-6">
+                        You have not claimed any courses for instruction in this session. Please claim the courses you teach to inspect student feedback.
+                    </p>
+                    <a href="{% url 'courses:claim_courses' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-full hover:bg-primary-container transition-all text-sm font-semibold shadow-sm focus:outline-none">
+                        <span class="material-symbols-outlined text-sm">add_circle</span>
+                        Claim Courses Now
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
