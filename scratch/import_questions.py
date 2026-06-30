@@ -2,7 +2,9 @@ import re
 from evaluations.models import EvaluationQuestion
 
 def run():
-    file_path = r"c:\Users\user\Downloads\questions.txt.txt"
+    import os
+    from django.conf import settings
+    file_path = os.path.join(settings.BASE_DIR, "questions.txt.txt")
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
