@@ -9,4 +9,4 @@ if [ "$POPULATE_DEMO_DATA" = "true" ]; then
     python manage.py populate_demo_data
 fi
 
-gunicorn config.wsgi --log-file -
+gunicorn config.wsgi --bind 0.0.0.0:$PORT --log-file -
