@@ -1,5 +1,5 @@
 import os
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from evaluations.models import EvaluationQuestion
@@ -12,13 +12,19 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write("Checking / Seeding academic courses...")
-        # Run course import if no courses exist
+        # Run course import if no courses exist for the specified semester
+        semester_name = os.environ.get("SEMESTER_NAME")
+        if not semester_name:
+            raise CommandError(
+                "SEMESTER_NAME environment variable is not set. "
+                "Please define it in your environment settings (e.g., SEMESTER_NAME=2025/2026 Second Semester)."
+            )
         from courses.models import Course
-        if not Course.objects.exists():
-            self.stdout.write("Importing courses from CSV...")
-            call_command('import_courses', 'lasu_course_allocations.csv', semester='2025/2026 First Semester')
+        if not Course.objects.filter(semester=semester_name).exists():
+            self.stdout.write(f"Importing courses from CSV for '{semester_name}'...")
+            call_command('import_courses', 'lasu_course_allocations.csv', semester=semester_name)
         else:
-            self.stdout.write("Courses already seeded.")
+            self.stdout.write(f"Courses for '{semester_name}' already seeded.")
             
         self.stdout.write("Checking / Seeding evaluation questions...")
         # Run questions import if no questions exist
