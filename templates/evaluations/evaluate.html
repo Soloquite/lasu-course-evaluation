@@ -113,7 +113,7 @@
                 {% if field.name != 'idempotency_key' %}
                     <div class="form-group pt-6 {% if forloop.first %}pt-0{% endif %}">
                         <label class="block font-title-md text-base font-bold text-primary mb-4">
-                            {{ forloop.counter }}. {{ field.label }}
+                            {{ forloop.counter0 }}. {{ field.label }}
                         </label>
 
                         {% if field.field.widget.attrs.rows %}

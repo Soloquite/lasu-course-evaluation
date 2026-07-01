@@ -27,12 +27,9 @@ class Command(BaseCommand):
             self.stdout.write(f"Courses for '{semester_name}' already seeded.")
             
         self.stdout.write("Checking / Seeding evaluation questions...")
-        # Run questions import if no questions exist
-        if not EvaluationQuestion.objects.exists():
-            self.stdout.write("Importing questions...")
-            seed_questions()
-        else:
-            self.stdout.write("Questions already seeded.")
+        # Run questions import to ensure they are seeded and updated
+        self.stdout.write("Importing/updating questions...")
+        seed_questions()
             
         self.stdout.write("Checking / Seeding default admin user...")
         # Create superuser if it doesn't exist
