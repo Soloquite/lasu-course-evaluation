@@ -15,6 +15,7 @@ from accounts.permissions import role_required
 from courses.models import Course, CourseRegistration, Department, CourseLecturer
 from .models import EvaluationSession, EvaluationQuestion, SubmissionRecord, EvaluationResponse
 from .forms import EvaluationForm
+from .constants import MIN_RESPONSES_FOR_AGGREGATE_DISPLAY
 CustomUser = get_user_model()
 
 
@@ -529,8 +530,15 @@ def admin_reports(request):
     except (ValueError, TypeError):
         selected_lecturer_id = None
     
-    # Base queryset of courses in the chosen semester
+    # Base queryset of courses in the chosen semester, annotated with submission count in ONE query (LEFT JOIN)
     courses = Course.objects.filter(semester=selected_session.title).select_related('department').prefetch_related('lecturers')
+    
+    courses = courses.annotate(
+        submission_count=Count(
+            'submissionrecord',
+            filter=Q(submissionrecord__session=selected_session)
+        )
+    )
     
     if selected_dept_id:
         courses = courses.filter(department_id=selected_dept_id)
@@ -541,23 +549,26 @@ def admin_reports(request):
     if not include_unclaimed:
         courses = courses.filter(lecturers__isnull=False).distinct()
         
+    # Fetch all mean ratings in one query (GROUP BY) for courses in the selected session
+    avg_ratings = EvaluationResponse.objects.filter(
+        session=selected_session,
+        question__question_type=EvaluationQuestion.QuestionType.RATING
+    ).values('course_id').annotate(mean_score=Avg('rating_value'))
+    
+    mean_scores_map = {}
+    for item in avg_ratings:
+        c_id = item['course_id']
+        val = item['mean_score']
+        if val is not None:
+            mean_scores_map[c_id] = round(val, 2)
+            
     # Build list containing aggregates
     courses_data = []
     for c in courses:
-        count = SubmissionRecord.response_count(c, selected_session)
-        enough, _ = SubmissionRecord.has_enough_responses_for_display(c, selected_session)
+        count = c.submission_count
+        enough = count >= MIN_RESPONSES_FOR_AGGREGATE_DISPLAY
+        mean_score = mean_scores_map.get(c.id) if enough else None
         
-        mean_score = None
-        if enough:
-            # Aggregate rating values across all rating questions for this course
-            mean_score = EvaluationResponse.objects.filter(
-                course=c,
-                session=selected_session,
-                question__question_type=EvaluationQuestion.QuestionType.RATING
-            ).aggregate(mean=Avg('rating_value'))['mean']
-            if mean_score is not None:
-                mean_score = round(mean_score, 2)
-                
         courses_data.append({
             'course': c,
             'lecturers': c.lecturers.all(),
