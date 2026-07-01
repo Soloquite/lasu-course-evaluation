@@ -168,7 +168,7 @@ class LecturerSignupForm(forms.Form):
         }),
     )
     lecturer_id = forms.CharField(
-        max_length=20,
+        max_length=150,
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',

@@ -499,10 +499,13 @@ def admin_reports(request):
     
     # Active or latest session
     session_id = request.GET.get('session')
-    if session_id:
-        selected_session = get_object_or_404(EvaluationSession, pk=session_id)
-    else:
-        selected_session = EvaluationSession.objects.order_by('-opens_at').first()
+    selected_session = None
+    
+    if EvaluationSession.objects.exists():
+        if session_id and str(session_id).isdigit():
+            selected_session = get_object_or_404(EvaluationSession, pk=int(session_id))
+        else:
+            selected_session = EvaluationSession.objects.order_by('-opens_at').first()
         
     if not selected_session:
         return render(request, 'evaluations/admin_reports.html', {
@@ -516,14 +519,24 @@ def admin_reports(request):
     lecturer_id = request.GET.get('lecturer')
     include_unclaimed = request.GET.get('include_unclaimed', 'true') == 'true'
     
+    try:
+        selected_dept_id = int(department_id) if department_id and str(department_id).isdigit() else None
+    except (ValueError, TypeError):
+        selected_dept_id = None
+        
+    try:
+        selected_lecturer_id = int(lecturer_id) if lecturer_id and str(lecturer_id).isdigit() else None
+    except (ValueError, TypeError):
+        selected_lecturer_id = None
+    
     # Base queryset of courses in the chosen semester
     courses = Course.objects.filter(semester=selected_session.title).select_related('department').prefetch_related('lecturers')
     
-    if department_id:
-        courses = courses.filter(department_id=department_id)
+    if selected_dept_id:
+        courses = courses.filter(department_id=selected_dept_id)
         
-    if lecturer_id:
-        courses = courses.filter(lecturers__id=lecturer_id)
+    if selected_lecturer_id:
+        courses = courses.filter(lecturers__id=selected_lecturer_id)
         
     if not include_unclaimed:
         courses = courses.filter(lecturers__isnull=False).distinct()
@@ -584,8 +597,8 @@ def admin_reports(request):
         'courses_data': courses_data,
         'departments': departments,
         'lecturers': lecturers,
-        'selected_department_id': int(department_id) if department_id else None,
-        'selected_lecturer_id': int(lecturer_id) if lecturer_id else None,
+        'selected_department_id': selected_dept_id,
+        'selected_lecturer_id': selected_lecturer_id,
         'include_unclaimed': include_unclaimed
     })
 

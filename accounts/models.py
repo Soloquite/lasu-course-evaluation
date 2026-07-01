@@ -65,7 +65,7 @@ class LecturerProfile(models.Model):
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="lecturer_profile"
     )
-    lecturer_id = models.CharField(max_length=20, unique=True)
+    lecturer_id = models.CharField(max_length=150, unique=True)
     department = models.ForeignKey(
         Department, on_delete=models.PROTECT, related_name="lecturers"
     )
